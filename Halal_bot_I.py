@@ -161,3 +161,19 @@ def run_with_dashboard_check():
 
 if __name__ == "__main__":
     run_with_dashboard_check()
+    
+# keep_alive.py - optional inline Flask server to keep webservice port open
+from flask import Flask
+import threading
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "✅ Halal bot is running!"
+
+def run_web():
+    app.run(host="0.0.0.0", port=10000)
+
+# Start the server in a background thread
+threading.Thread(target=run_web).start()
