@@ -4,3 +4,4 @@ pandas
 python-binance
 supabase
 twilio
+ta
