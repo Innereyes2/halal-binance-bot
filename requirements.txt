@@ -1,0 +1,6 @@
+python-dotenv
+schedule
+pandas
+python-binance
+supabase
+twilio

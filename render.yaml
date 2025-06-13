@@ -1,0 +1,8 @@
+services:
+  - type: worker
+    name: halal-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python Halal_bot_I.py
+    envVars:
+      - fromDotEnv: true
