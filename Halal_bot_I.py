@@ -1,4 +1,3 @@
-# Halal_bot_I.py — with dashboard control
 import os
 import time
 import schedule
@@ -8,8 +7,11 @@ from supabase import create_client
 from utils.whatsapp import send_whatsapp
 from halal_coins import get_halal_symbols
 from strategies.ema_rsi import fetch_ohlcv, generate_signal
+from keep_alive import keep_alive  # ✅ NEW
 
-# ✅ NEW: Import dashboard check
+# ✅ Start web server to keep Render port alive
+keep_alive()
+
 def get_dashboard_status():
     try:
         status = supabase.table("Running").select("*").eq("id", 1).execute()
@@ -17,14 +19,11 @@ def get_dashboard_status():
     except:
         return False
 
-# Load .env
 load_dotenv()
 
-# Clients
 client = Client(os.getenv("BINANCE_API_KEY"), os.getenv("BINANCE_API_SECRET"), testnet=True)
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
-# Files and settings
 CAPITAL_FILE = "capital_tracker.txt"
 BUY_LOG_FILE = "last_buy_prices.txt"
 DEFAULT_CAPITAL = 100.00
@@ -148,7 +147,6 @@ def run_trading_cycle():
     if trades_made == 0:
         print(f"🔍 Scanned {scanned} coins. No trade signal at {time.strftime('%Y-%m-%d %H:%M:%S')}. HOLD.")
 
-# ✅ Real-time bot loop, only runs when dashboard says "ON"
 def run_with_dashboard_check():
     print("🤖 Bot waiting for dashboard signal... (every 30 sec)")
     while True:
@@ -157,23 +155,7 @@ def run_with_dashboard_check():
             run_trading_cycle()
         else:
             print("⏸ Dashboard says STOP — skipping trading cycle.")
-        time.sleep(300)  # 5 minutes
+        time.sleep(300)
 
 if __name__ == "__main__":
     run_with_dashboard_check()
-    
-# keep_alive.py - optional inline Flask server to keep webservice port open
-from flask import Flask
-import threading
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "✅ Halal bot is running!"
-
-def run_web():
-    app.run(host="0.0.0.0", port=10000)
-
-# Start the server in a background thread
-threading.Thread(target=run_web).start()
