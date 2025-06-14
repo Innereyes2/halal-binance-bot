@@ -10,12 +10,8 @@ from strategies.ema_rsi import fetch_ohlcv, generate_signal
 from keep_alive import keep_alive
 from dashboard import start_dashboard_server
 
-# ✅ Load environment
+# ✅ Load environment variables first
 load_dotenv()
-
-# ✅ Start background services
-keep_alive()
-Thread(target=start_dashboard_server).start()
 
 # ✅ Supabase & Binance (live mode)
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
@@ -154,7 +150,7 @@ def run_trading_cycle():
     if trades_made == 0:
         print(f"🔍 Scanned {scanned} coins. No trade signal at {time.strftime('%Y-%m-%d %H:%M:%S')}. HOLD.")
 
-# ✅ Main loop
+# ✅ Bot controller loop
 def run_with_dashboard_check():
     print("🤖 Bot waiting for dashboard signal... (every 30 sec)")
     while True:
@@ -165,6 +161,8 @@ def run_with_dashboard_check():
             print("⏸ Dashboard says STOP — skipping trading cycle.")
         time.sleep(300)
 
-# ✅ Start bot
+# ✅ Start everything
 if __name__ == "__main__":
+    keep_alive()
+    Thread(target=start_dashboard_server).start()
     run_with_dashboard_check()
