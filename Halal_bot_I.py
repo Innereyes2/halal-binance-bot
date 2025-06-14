@@ -1,34 +1,41 @@
 import os
 import time
-import schedule
+from threading import Thread
 from dotenv import load_dotenv
 from binance.client import Client
 from supabase import create_client
 from utils.whatsapp import send_whatsapp
 from halal_coins import get_halal_symbols
 from strategies.ema_rsi import fetch_ohlcv, generate_signal
-from keep_alive import keep_alive  # ✅ NEW
+from keep_alive import keep_alive
+from dashboard import start_dashboard_server
 
-# ✅ Start web server to keep Render port alive
-keep_alive()
-
-def get_dashboard_status():
-    try:
-        status = supabase.table("Running").select("*").eq("id", 1).execute()
-        return status.data[0]["running"]
-    except:
-        return False
-
+# ✅ Load environment
 load_dotenv()
 
-client = Client(os.getenv("BINANCE_API_KEY"), os.getenv("BINANCE_API_SECRET"), testnet=True)
-supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+# ✅ Start background services
+keep_alive()
+Thread(target=start_dashboard_server).start()
 
+# ✅ Supabase & Binance (live mode)
+supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+client = Client(os.getenv("BINANCE_API_KEY"), os.getenv("BINANCE_API_SECRET"), testnet=False)
+
+# ✅ Files and configs
 CAPITAL_FILE = "capital_tracker.txt"
 BUY_LOG_FILE = "last_buy_prices.txt"
 DEFAULT_CAPITAL = 100.00
 MAX_TRADES = 5
 
+# ✅ Bot status
+def get_dashboard_status():
+    try:
+        status = supabase.table("status").select("*").eq("id", 1).execute()
+        return status.data[0]["running"]
+    except:
+        return False
+
+# ✅ File handlers
 def load_capital():
     try:
         with open(CAPITAL_FILE, "r") as f:
@@ -54,12 +61,12 @@ def save_buy_log(buy_log):
         for symbol, price in buy_log.items():
             f.write(f"{symbol},{price}\n")
 
+# ✅ Main trading logic
 def run_trading_cycle():
     capital = load_capital()
     buy_log = load_buy_log()
     symbols_to_trade = get_halal_symbols(client)
-    scanned = 0
-    trades_made = 0
+    scanned, trades_made = 0, 0
     trade_candidates = []
 
     for symbol in symbols_to_trade:
@@ -147,6 +154,7 @@ def run_trading_cycle():
     if trades_made == 0:
         print(f"🔍 Scanned {scanned} coins. No trade signal at {time.strftime('%Y-%m-%d %H:%M:%S')}. HOLD.")
 
+# ✅ Main loop
 def run_with_dashboard_check():
     print("🤖 Bot waiting for dashboard signal... (every 30 sec)")
     while True:
@@ -157,5 +165,6 @@ def run_with_dashboard_check():
             print("⏸ Dashboard says STOP — skipping trading cycle.")
         time.sleep(300)
 
+# ✅ Start bot
 if __name__ == "__main__":
     run_with_dashboard_check()
