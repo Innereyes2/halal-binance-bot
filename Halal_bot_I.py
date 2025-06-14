@@ -1,3 +1,5 @@
+# ✅ Halal_bot_I.py — main live bot with dashboard and trading engine
+
 import os
 import time
 from threading import Thread
@@ -86,7 +88,7 @@ def run_trading_cycle():
                     "sl": sl
                 })
         except Exception as e:
-            print(f"⚠️ Error processing {symbol}: {e}")
+            print(f"\u26a0\ufe0f Error processing {symbol}: {e}")
             continue
 
     top_trades = sorted(trade_candidates, key=lambda x: x['atr'], reverse=True)[:MAX_TRADES]
@@ -99,7 +101,7 @@ def run_trading_cycle():
         buy_log[trade['symbol']] = trade['price']
         save_buy_log(buy_log)
 
-        msg = f"📥 SMART BUY {trade['symbol']}\nPrice: {trade['price']}\nQty: {qty}\nTP: {trade['tp']:.2f}\nSL: {trade['sl']:.2f}"
+        msg = f"\ud83d\udcc5 SMART BUY {trade['symbol']}\nPrice: {trade['price']}\nQty: {qty}\nTP: {trade['tp']:.2f}\nSL: {trade['sl']:.2f}"
         supabase.table("trades").insert({
             "symbol": trade['symbol'],
             "side": "BUY",
@@ -108,7 +110,7 @@ def run_trading_cycle():
             "profit": None
         }).execute()
         send_whatsapp(msg)
-        print("✅ Buy executed:", msg)
+        print("\u2705 Buy executed:", msg)
         trades_made += 1
 
     for symbol in list(buy_log.keys()):
@@ -131,8 +133,8 @@ def run_trading_cycle():
                 del buy_log[symbol]
                 save_buy_log(buy_log)
 
-                status = "🎯 TP HIT" if current >= tp else ("🛑 SL HIT" if current <= sl else "📉 SELL SIGNAL")
-                msg = f"📤 {status} {symbol}\nExit: {current}\nQty: {qty}\n💰 Profit: {profit} USDT\n📈 Capital: {capital:.2f}"
+                status = "\ud83c\udf1f TP HIT" if current >= tp else ("\ud83d\udea9 SL HIT" if current <= sl else "\ud83d\udcc9 SELL SIGNAL")
+                msg = f"\ud83d\udcc4 {status} {symbol}\nExit: {current}\nQty: {qty}\n\ud83d\udcb0 Profit: {profit} USDT\n\ud83d\udcc8 Capital: {capital:.2f}"
                 supabase.table("trades").insert({
                     "symbol": symbol,
                     "side": "SELL",
@@ -141,24 +143,24 @@ def run_trading_cycle():
                     "profit": profit
                 }).execute()
                 send_whatsapp(msg)
-                print("✅ Sell executed:", msg)
+                print("\u2705 Sell executed:", msg)
                 trades_made += 1
         except Exception as e:
-            print(f"⚠️ Error selling {symbol}: {e}")
+            print(f"\u26a0\ufe0f Error selling {symbol}: {e}")
             continue
 
     if trades_made == 0:
-        print(f"🔍 Scanned {scanned} coins. No trade signal at {time.strftime('%Y-%m-%d %H:%M:%S')}. HOLD.")
+        print(f"\ud83d\udd0d Scanned {scanned} coins. No trade signal at {time.strftime('%Y-%m-%d %H:%M:%S')}. HOLD.")
 
 # ✅ Bot controller loop
 def run_with_dashboard_check():
-    print("🤖 Bot waiting for dashboard signal... (every 30 sec)")
+    print("\ud83e\udd16 Bot waiting for dashboard signal... (every 30 sec)")
     while True:
         if get_dashboard_status():
-            print("▶️ Dashboard says RUN — starting trading cycle...")
+            print("\u25b6\ufe0f Dashboard says RUN — starting trading cycle...")
             run_trading_cycle()
         else:
-            print("⏸ Dashboard says STOP — skipping trading cycle.")
+            print("\u23f8 Dashboard says STOP — skipping trading cycle.")
         time.sleep(300)
 
 # ✅ Start everything
