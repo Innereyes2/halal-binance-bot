@@ -134,6 +134,8 @@ def run_trading_cycle():
 
 def run_with_dashboard_check():
     print("🤖 Bot waiting for dashboard signal... (every 1 min)")
+    send_whatsapp("✅ Halal Bot is now ONLINE and ready to trade 📈")
+    
     while True:
         if get_dashboard_status():
             print("▶️ Dashboard says RUN — starting trading cycle...")
