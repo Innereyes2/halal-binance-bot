@@ -38,24 +38,24 @@ def generate_signal(df):
 
         latest = df.iloc[-1]
 
+        # ✅ RELAXED BUY SIGNAL
         buy = (
             latest['ema_12'] > latest['ema_26'] and
-            latest['rsi'] < 30 and
+            latest['rsi'] < 60 and
             latest['macd'] > latest['macd_signal'] and
-            latest['close'] < latest['bb_lower'] and
-            latest['stoch_k'] > latest['stoch_d'] and latest['stoch_k'] < 20 and
-            latest['adx'] > 25 and
-            latest['volume'] > latest['vol_ma']
+            latest['stoch_k'] < 50 and
+            latest['adx'] > 20 and
+            latest['volume'] > 0
         )
 
+        # ✅ RELAXED SELL SIGNAL
         sell = (
             latest['ema_12'] < latest['ema_26'] and
-            latest['rsi'] > 70 and
+            latest['rsi'] > 40 and
             latest['macd'] < latest['macd_signal'] and
-            latest['close'] > latest['bb_upper'] and
-            latest['stoch_k'] < latest['stoch_d'] and latest['stoch_k'] > 80 and
-            latest['adx'] > 25 and
-            latest['volume'] > latest['vol_ma']
+            latest['stoch_k'] > 50 and
+            latest['adx'] > 20 and
+            latest['volume'] > 0
         )
 
         if buy:

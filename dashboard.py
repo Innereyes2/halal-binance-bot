@@ -1,4 +1,4 @@
-# ✅ dashboard.py — Flask control dashboard
+# ✅ dashboard.py — now modular & Fly.io friendly
 import os
 from flask import Flask, request, render_template_string
 from dotenv import load_dotenv
@@ -56,8 +56,4 @@ def dashboard():
     trades = supabase.table("trades").select("symbol, price, quantity").order("id", desc=True).limit(10).execute().data
     return render_template_string(HTML, status="RUNNING ✅" if running else "STOPPED 🚩", trades=trades)
 
-def start_dashboard_server():
-    app.run(host="0.0.0.0", port=10000)
-
-if __name__ == "__main__":
-    start_dashboard_server()
+# ❌ DO NOT RUN app here! It is started from main.py
